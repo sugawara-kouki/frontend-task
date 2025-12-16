@@ -7,17 +7,17 @@ import { PageEditor } from "./components/PageEditor/PageEditor";
 export default function Page() {
   const {
     pages,
-    currentPage,
     currentPageId,
     setCurrentPageId,
     createPage,
     updatePage,
     deletePage,
+    fetchPageById,
   } = usePages();
 
   const handleSave = (title: string, body: string) => {
-    if (currentPage) {
-      updatePage(currentPage.id, { title, body });
+    if (currentPageId) {
+      updatePage(currentPageId, { title, body });
     }
   };
 
@@ -35,12 +35,12 @@ export default function Page() {
           <div className="h-full flex items-center justify-center text-gray-500">
             読込中...
           </div>
-        ) : currentPage ? (
+        ) : currentPageId ? (
           <div className="h-full flex flex-col">
             <PageEditor
-              key={currentPage.id} // ページが切り替わったことをコンポーネントに伝える
-              title={currentPage.title}
-              body={currentPage.body}
+              key={currentPageId} // ページが切り替わったことをコンポーネントに伝える
+              pageId={currentPageId}
+              fetchPageById={fetchPageById}
               onSave={handleSave}
             />
             <div className="flex justify-between py-5">

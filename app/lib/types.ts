@@ -5,5 +5,3 @@ export interface Page {
   createdAt: number;
   updatedAt: number;
 }
-
-export type PageInput = Omit<Page, "id" | "createdAt" | "updatedAt">;

@@ -1,21 +1,38 @@
 "use client";
 import { usePageEditor } from "../../hooks/usePageEditor";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { SaveButton } from "../Button/SaveButton";
 import { EditButton } from "../Button/EditButton";
 import { CancelButton } from "../Button/CancelButton";
 
 interface PageEditorProps {
-  title: string;
-  body: string;
+  pageId: string;
+  fetchPageById: (id: string) => Promise<{ title: string; body: string } | null>;
   onSave: (title: string, body: string) => void;
 }
 
 export function PageEditor({
-  title: initialTitle,
-  body: initialBody,
+  pageId,
+  fetchPageById,
   onSave,
 }: PageEditorProps) {
+  const [initialTitle, setInitialTitle] = useState("");
+  const [initialBody, setInitialBody] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // ページIDが変わったら詳細を取得
+  useEffect(() => {
+    const loadPage = async () => {
+      setIsLoading(true);
+      const pageData = await fetchPageById(pageId);
+      if (pageData) {
+        setInitialTitle(pageData.title);
+        setInitialBody(pageData.body);
+      }
+      setIsLoading(false);
+    };
+    loadPage();
+  }, [pageId, fetchPageById]);
   const {
     title,
     body,
@@ -71,6 +88,14 @@ export function PageEditor({
     clearBodyError();
     setIsContentEdit(true);
   };
+
+  if (isLoading) {
+    return (
+      <div className="h-full flex items-center justify-center text-gray-500">
+        読込中...
+      </div>
+    );
+  }
 
   return (
     <div className="h-full flex flex-col">

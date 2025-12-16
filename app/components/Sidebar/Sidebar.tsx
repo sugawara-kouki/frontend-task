@@ -6,7 +6,7 @@ import { EditButton } from "../Button/EditButton";
 import { DeleteButton } from "../Button/DeleteButton";
 import { NewPageButton } from "../Button/NewPageButton";
 import { DoneButton } from "../Button/DoneButton";
-import { Page } from "@/app/types/page";
+import { Page } from "@/app/lib/types";
 
 type SidebarProps = {
   pages: Page[] | undefined;

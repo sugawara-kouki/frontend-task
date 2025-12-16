@@ -4,12 +4,12 @@ import { useState } from "react";
 import { z } from "zod";
 
 // Zodバリデーションスキーマ（個別フィールド用）
-export const titleSchema = z
+const titleSchema = z
   .string()
   .min(1, "タイトルは1文字以上で入力してください")
   .max(50, "タイトルは50文字以下で入力してください");
 
-export const bodySchema = z
+const bodySchema = z
   .string()
   .min(10, "詳細は10文字以上で入力してください")
   .max(2000, "詳細は2000文字以下で入力してください");
@@ -55,7 +55,7 @@ export function usePageEditor({
   // タイトル保存処理
   const handleSaveTitle = () => {
     if (validateTitle(title)) {
-      onSave(title, body);
+      onSave(title, initialBody); // 本文は元の値を使う
       return true;
     }
     return false;
@@ -64,7 +64,7 @@ export function usePageEditor({
   // 本文保存処理
   const handleSaveBody = () => {
     if (validateBody(body)) {
-      onSave(title, body);
+      onSave(initialTitle, body); // タイトルは元の値を使う
       return true;
     }
     return false;
@@ -81,7 +81,6 @@ export function usePageEditor({
     setBody,
     titleError,
     bodyError,
-    setBodyError,
     handleSaveTitle,
     handleSaveBody,
     clearTitleError,

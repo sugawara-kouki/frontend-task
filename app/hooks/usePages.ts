@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { z } from "zod";
-import { Page } from "../types/page"; // 既存の型定義を流用
+import { Page } from "../lib/types"; // 既存の型定義を流用
 
 // Zodスキーマを定義
 // APIからのレスポンス(id: number)
@@ -51,8 +51,32 @@ export function usePages() {
     fetchPages();
   }, []);
 
-  // 現在選択中のページを取得
-  const currentPage = pages?.find((page) => page.id === currentPageId) || null;
+  // IDからページ詳細を取得
+  const fetchPageById = async (id: string): Promise<Page | null> => {
+    // 新規作成ページ（一時ID）の場合はAPIを呼ばず空データを返す
+    if (id.startsWith("client-temp-")) {
+      return {
+        id,
+        title: "",
+        body: "",
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/content/${id}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch page: ${response.status}`);
+      }
+      const data = await response.json();
+      const loadedPage = pageSchema.parse(data);
+      return loadedPage;
+    } catch (error) {
+      console.error("Error fetching page:", error);
+      return null;
+    }
+  };
 
   // 新規ページ作成
   const createPage = () => {
@@ -138,11 +162,11 @@ export function usePages() {
 
   return {
     pages,
-    currentPage: pages === undefined ? undefined : currentPage,
     currentPageId,
     setCurrentPageId,
     createPage,
     updatePage,
     deletePage,
+    fetchPageById,
   };
 }
