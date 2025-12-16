@@ -1,36 +1,92 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## 概要
 
-## Getting Started
+このリポジトリは、指定された技術課題の要件に基づき作成されたフロントエンドアプリケーションです。
+バックエンド API と連携し、ページの閲覧、作成、編集、削除といった基本的な CRUD 機能を提供します。
 
-First, run the development server:
+## 技術スタック
+
+- **フレームワーク**: Next.js (App Router)
+- **言語**: TypeScript
+- **スタイリング**: Tailwind CSS
+- **状態管理**: React Hooks (useState, useEffect)
+- **データフェッチ**: Fetch API
+- **バリデーション**: Zod
+
+### 技術選定理由
+
+- **Next.js (App Router)**: モダンな React の機能を活用しつつ、ファイルベースルーティングによる直感的な開発が可能なため採用しました。サーバーコンポーネントとクライアントコンポーネントを適切に使い分けることで、将来的なパフォーマンス最適化も見据えています。
+- **Tailwind CSS**: ユーティリティファーストのアプローチにより、CSS ファイルとコンポーネントファイル間のコンテキストスイッチを減らし、迅速な UI 開発を実現できるため採用しました。
+- **Zod**: API レスポンスやフォーム入力のバリデーションを型安全に行うために導入しました。スキーマを一度定義するだけで、型定義とバリデーションロジックを両立できる点が高く評価できます。
+
+## 環境構築
+
+### 1. バックエンド API のセットアップ
+
+まず、課題で指定されたバックエンド API をローカルで実行します。
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# 課題リポジトリをクローン
+git clone https://github.com/ncdcdev/recruit-frontend.git
+
+# バックエンドディレクトリに移動
+cd recruit-frontend/backend
+
+# 依存関係をインストール
+npm install
+
+# APIサーバーを起動
+npm run start
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+API は `http://localhost:3000` で実行されます。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### 2. フロントエンドのセットアップ
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+次に、このリポジトリ（フロントエンド）をセットアップします。
 
-## Learn More
+```bash
+# 依存関係をインストール
+npm install
 
-To learn more about Next.js, take a look at the following resources:
+# 開発サーバーを起動
+npm run dev
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+アプリケーションは `http://localhost:3001` （または別の利用可能なポート）で起動します。ブラウザでアクセスしてください。
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 設計思想・アーキテクチャ
 
-## Deploy on Vercel
+本アプリケーションは、保守性、可読性、拡張性を重視して設計されています。
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 1. 関心の分離 (Separation of Concerns)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+カスタムフック (`hooks/`) を活用し、UI ロジックとビジネスロジック（状態管理、API 通信など）を明確に分離しています。
+
+- **`usePages`**: ページ全体のデータ取得、キャッシュ、CRUD 操作（作成、更新、削除）といった、API 通信とそれに伴う状態管理の責務を担います。
+- **`usePageEditor`**: 個々のページのタイトルや本文の編集状態、入力値のバリデーション、保存処理といった、エディタ機能に特化した UI ロジックの責務を担います。
+
+これにより、各コンポーネントは純粋な UI の描画に集中でき、見通しが良く再利用性の高い構成となっています。
+
+### 2. コンポーネント設計
+
+`components/` 配下には、責務に応じて分割されたコンポーネントを配置しています。
+
+- **Presentational/Container パターン**: `page.tsx` がコンテナとして `usePages` フックからデータとロジックを受け取り、`Sidebar` や `PageEditor` といったプレゼンテーショナルコンポーネントに props として渡す構成を基本としています。
+- **粒度**: `Button` のような最小単位の汎用コンポーネントから、`PageEditor` のような複数の要素を組み合わせた複合コンポーネントまで、適切な粒度でコンポーネント化を行っています。
+
+### 3. ディレクトリ構成（コロケーション）
+
+関連するファイルを近くに配置する「コロケーション」の考え方を採用しています。例えば、`PageEditor` コンポーネントに関連する `usePageEditor` フックは、それぞれ `components` と `hooks` ディレクトリに分かれていますが、機能（Editor）という単位で見ると密接に関連しています。将来的には `features/editor/` のようなディレクトリにまとめて配置することで、より機能の凝集度を高めるアーキテクチャに発展させることも可能です。
+
+## テストについて
+
+本課題の要件である「有効だと思うテストコード」として、以下のテストを実装することが有効だと考えます。（※現時点では未実装）
+
+- **`usePageEditor` フックの単体テスト**:
+  - **目的**: バリデーションロジックが正しく機能することを確認する。
+  - **テストケース**:
+    - タイトルが 1 文字未満、または 51 文字以上の場合にエラーが返されること。
+    - 本文が 10 文字未満、または 2001 文字以上の場合にエラーが返されること。
+    - 有効な入力値の場合にエラーが返されないこと。
+
+このテストは、UI から独立した純粋なロジックのテストであり、アプリケーションの堅牢性を担保する上で最もコストパフォーマンスが高いと考えられます。
