@@ -9,7 +9,7 @@ export const titleSchema = z
   .min(1, "タイトルは1文字以上で入力してください")
   .max(50, "タイトルは50文字以下で入力してください");
 
-export const contentSchema = z
+export const bodySchema = z
   .string()
   .min(10, "詳細は10文字以上で入力してください")
   .max(2000, "詳細は2000文字以下で入力してください");
@@ -17,7 +17,7 @@ export const contentSchema = z
 interface UsePageEditorProps {
   initialTitle?: string;
   initialBody?: string;
-  onSave: (title: string, content: string) => void;
+  onSave: (title: string, body: string) => void;
 }
 
 export function usePageEditor({
@@ -42,8 +42,8 @@ export function usePageEditor({
   };
 
   // 本文のバリデーション
-  const validateContent = (value: string): boolean => {
-    const result = contentSchema.safeParse(value);
+  const validateBody = (value: string): boolean => {
+    const result = bodySchema.safeParse(value);
     if (!result.success) {
       setBodyError(result.error.issues[0]?.message);
       return false;
@@ -63,7 +63,7 @@ export function usePageEditor({
 
   // 本文保存処理
   const handleSaveBody = () => {
-    if (validateContent(body)) {
+    if (validateBody(body)) {
       onSave(title, body);
       return true;
     }
