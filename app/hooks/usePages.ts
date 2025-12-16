@@ -55,16 +55,18 @@ export function usePages() {
   const currentPage = pages?.find((page) => page.id === currentPageId) || null;
 
   // 新規ページ作成
-  const createPage = async () => {
-    const response = await fetch(`${API_BASE_URL}/content`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title: "", body: "" }),
-    });
-    const newPageData = await response.json();
-    const newPage = pageSchema.parse(newPageData);
-    setPages(pages ? [...pages, newPage] : [newPage]);
-    setCurrentPageId(newPage.id);
+  const createPage = () => {
+    // APIを呼び出さず、クライアント側で一時的なページを作成
+    const tempId = `client-temp-${crypto.randomUUID()}`; // 一時的なIDを生成
+    const newPage: Page = {
+      id: tempId,
+      title: "",
+      body: "",
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+    };
+    setPages((prevPages) => (prevPages ? [...prevPages, newPage] : [newPage]));
+    setCurrentPageId(newPage.id); // 新しい一時ページを選択状態にする
   };
 
   // ページ更新
@@ -72,14 +74,50 @@ export function usePages() {
     id: string,
     updates: Partial<Pick<Page, "title" | "body">>
   ) => {
-    const response = await fetch(`${API_BASE_URL}/content/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(updates),
+    const isNewPage = id.startsWith("client-temp-"); // 一時IDかどうかで新規作成か更新かを判断
+    let response;
+    let method;
+    let url;
+
+    if (isNewPage) {
+      // 新規ページの場合はPOSTリクエスト
+      method = "POST";
+      url = `${API_BASE_URL}/content`;
+      response = await fetch(url, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates), // 更新内容をそのまま送信
+      });
+    } else {
+      // 既存ページの場合はPUTリクエスト
+      method = "PUT";
+      url = `${API_BASE_URL}/content/${id}`;
+      response = await fetch(url, {
+        method: method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
+      });
+    }
+
+    if (!response.ok) {
+      console.error(`Failed to ${method} page:`, await response.text());
+      // エラーハンドリングをここに追加することも検討
+      return;
+    }
+
+    const apiPageData = await response.json();
+    const processedPage = pageSchema.parse(apiPageData);
+
+    setPages((prevPages) => {
+      if (!prevPages) return [processedPage];
+      // 一時ページをAPIから返されたページに置き換える、または既存ページを更新
+      return prevPages.map((page) => (page.id === id ? processedPage : page));
     });
-    const updatedPageData = await response.json();
-    const updatedPage = pageSchema.parse(updatedPageData);
-    setPages(pages?.map((page) => (page.id === id ? updatedPage : page)));
+
+    // 新規ページだった場合、currentPageIdをAPIから返された実際のIDに更新
+    if (isNewPage) {
+      setCurrentPageId(processedPage.id);
+    }
   };
 
   // ページ削除
