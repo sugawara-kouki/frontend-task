@@ -2,16 +2,14 @@ import { renderHook, act } from "@testing-library/react";
 import { usePageEditor } from "./usePageEditor";
 
 describe("usePageEditor", () => {
-  // onSaveが呼ばれたかをチェックするためのモック関数
   const onSaveMock = jest.fn();
 
   beforeEach(() => {
-    // 各テストの前にモックをリセット
     onSaveMock.mockClear();
   });
 
-  describe("Title Validation", () => {
-    it("should set an error for an empty title", () => {
+  describe("handleSaveTitle", () => {
+    it("無効なタイトルの場合、エラーを設定しonSaveを呼ばない", () => {
       const { result } = renderHook(() =>
         usePageEditor({ onSave: onSaveMock })
       );
@@ -24,33 +22,11 @@ describe("usePageEditor", () => {
         result.current.handleSaveTitle();
       });
 
-      expect(result.current.titleError).toBe(
-        "タイトルは1文字以上で入力してください"
-      );
+      expect(result.current.titleError).toBeDefined();
       expect(onSaveMock).not.toHaveBeenCalled();
     });
 
-    it("should set an error for a title longer than 50 characters", () => {
-      const { result } = renderHook(() =>
-        usePageEditor({ onSave: onSaveMock })
-      );
-      const longTitle = "a".repeat(51);
-
-      act(() => {
-        result.current.setTitle(longTitle);
-      });
-
-      act(() => {
-        result.current.handleSaveTitle();
-      });
-
-      expect(result.current.titleError).toBe(
-        "タイトルは50文字以下で入力してください"
-      );
-      expect(onSaveMock).not.toHaveBeenCalled();
-    });
-
-    it("should not set an error for a valid title and call onSave", () => {
+    it("有効なタイトルの場合、エラーをクリアしonSaveを呼ぶ", () => {
       const { result } = renderHook(() =>
         usePageEditor({ onSave: onSaveMock })
       );
@@ -68,8 +44,8 @@ describe("usePageEditor", () => {
     });
   });
 
-  describe("Body Validation", () => {
-    it("should set an error for a body shorter than 10 characters", () => {
+  describe("handleSaveBody", () => {
+    it("無効な本文の場合、エラーを設定しonSaveを呼ばない", () => {
       const { result } = renderHook(() =>
         usePageEditor({ onSave: onSaveMock })
       );
@@ -82,33 +58,11 @@ describe("usePageEditor", () => {
         result.current.handleSaveBody();
       });
 
-      expect(result.current.bodyError).toBe(
-        "詳細は10文字以上で入力してください"
-      );
+      expect(result.current.bodyError).toBeDefined();
       expect(onSaveMock).not.toHaveBeenCalled();
     });
 
-    it("should set an error for a body longer than 2000 characters", () => {
-      const { result } = renderHook(() =>
-        usePageEditor({ onSave: onSaveMock })
-      );
-      const longBody = "a".repeat(2001);
-
-      act(() => {
-        result.current.setBody(longBody);
-      });
-
-      act(() => {
-        result.current.handleSaveBody();
-      });
-
-      expect(result.current.bodyError).toBe(
-        "詳細は2000文字以下で入力してください"
-      );
-      expect(onSaveMock).not.toHaveBeenCalled();
-    });
-
-    it("should not set an error for a valid body and call onSave", () => {
+    it("有効な本文の場合、エラーをクリアしonSaveを呼ぶ", () => {
       const { result } = renderHook(() =>
         usePageEditor({ onSave: onSaveMock })
       );

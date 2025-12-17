@@ -1,18 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { z } from "zod";
-
-// Zodバリデーションスキーマ（個別フィールド用）
-const titleSchema = z
-  .string()
-  .min(1, "タイトルは1文字以上で入力してください")
-  .max(50, "タイトルは50文字以下で入力してください");
-
-const bodySchema = z
-  .string()
-  .min(10, "詳細は10文字以上で入力してください")
-  .max(2000, "詳細は2000文字以下で入力してください");
+import { titleSchema, bodySchema } from "../lib/validation";
 
 interface UsePageEditorProps {
   initialTitle?: string;
