@@ -44,6 +44,7 @@ npm run dev
 - **[仕様書](docs/specification.md)**: 機能要件、バリデーションルール、テスト要件
 - **[基本設計](docs/design-basics.md)**: アーキテクチャの決定事項、技術選定の理由、コンポーネント設計、非機能要件
 - **[詳細設計](docs/design-details.md)**: データモデル、API データフロー、バリデーション詳細、状態管理詳細
+- **[リファクタリング案](docs/refactoring-ideas.md)**: 実装できなかった改善案
 
 ### アーキテクチャの概要
 
